@@ -4,12 +4,19 @@ from threading import Thread
 import socket
 import time
 
-def listen(ser, server):
+def listen(ser):
     while True:
         line = ser.readline()
         if line.decode() != "" and line.decode() != "\n":
             pline = line.decode().replace("\n", "")
-            print(pline)
+            print("rb2"+pline)
+
+def listen2(client, ser):
+    command = client.recv(1024).decode()
+    if "<HAV_ts>" in command:
+        print(command)
+        command.replace("<HAV_ts>", "")
+        rbSer.write(command.encode())
 
 rbSer = None
 
@@ -24,34 +31,37 @@ ports = list(serial.tools.list_ports.comports())
 for p in ports:
     rbSer = serial.Serial(p[0], 9600, timeout=10)
     line = rbSer.readline()
-    print(line)
+    print("rb"+line.decode())
     rbSer.write("<HAV_pi>\n".encode())
     line = rbSer.readline()
     if "<HAV_rb>" in line.decode():
         print(line.decode())
         connectd = True
+        break
 
 #SOCKET STUFF (SERVER)
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    IP = socket.gethostbyname(socket.gethostname())
-    server.bind((IP, PORT))
-    server.listen(1)
-
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#print(socket.gethostname())
+#IP = socket.gethostbyname("HAV_pi")
+server.bind(("10.0.0.12", PORT))
+server.listen(1)
+while client == 0:
     while client == 0:
-        while client == 0:
-            client, address = server.accept()
-        data = client.recv(1024).decode()
-        if "<HAV_ts>" in data:
-            client.send("<HAV_pi>".encode())
-            print("<SELF> connected!")
-        else:
-            client = None
+        client, address = server.accept()
+    data = client.recv(1024).decode()
+    if "<HAV_ts>" in data:
+        client.send("<HAV_pi>".encode())
+        print("<SELF> connected!")
+    else:
+        client = None
 
 #MAIN BODY OF OPERATION
 
-thread = Thread(target=listen, args=(rbSer, server,))
+thread = Thread(target=listen, args=(rbSer,))
 thread.start()
 
+thread2 = Thread(target=listen2, args=(client, rbSer))
+thread2.start()
+
 while connectd == True:
-    command = client.recv(1024).decode()
-    rbSer.write(command.encode())
+    pass
