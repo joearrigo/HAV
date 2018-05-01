@@ -4,19 +4,21 @@ from threading import Thread
 import socket
 import time
 
-def listen(ser):
+def listen(ser, client):
     while True:
         line = ser.readline()
         if line.decode() != "" and line.decode() != "\n":
             pline = line.decode().replace("\n", "")
-            print("rb2"+pline)
+            print(pline)
+            client.send(("HAV_pi"+pline).encode())
 
 def listen2(client, ser):
-    command = client.recv(1024).decode()
-    if "<HAV_ts>" in command:
-        print(command)
-        command.replace("<HAV_ts>", "")
-        rbSer.write(command.encode())
+    while True:
+        command = client.recv(1024).decode()
+        if "<HAV_ts>" in command:
+            print(command)
+            command.replace("<HAV_ts>", "")
+            rbSer.write(command.encode())
 
 rbSer = None
 
@@ -57,7 +59,7 @@ while client == 0:
 
 #MAIN BODY OF OPERATION
 
-thread = Thread(target=listen, args=(rbSer,))
+thread = Thread(target=listen, args=(rbSer, client,))
 thread.start()
 
 thread2 = Thread(target=listen2, args=(client, rbSer))
