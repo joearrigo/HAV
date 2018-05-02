@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane id="AnchorPane" prefHeight="200" prefWidth="673.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9.0.1" fx:controller="controlpanel.FXMLDocumentController">
+    <children>
+        <Label fx:id="label" layoutX="126" layoutY="120" minHeight="16" minWidth="69" />
+      <Slider id="slider_Fwdback" fx:id="slider_Fwdback" layoutX="67.0" layoutY="50.0" onMouseReleased="#mouseDragReleased" orientation="VERTICAL" prefHeight="140.0" prefWidth="46.0" value="50.0" />
+      <Slider id="slider_Updown" fx:id="slider_Updown" layoutX="570.0" layoutY="51.0" onMouseReleased="#mouseDragReleased" orientation="VERTICAL" prefHeight="140.0" prefWidth="46.0" value="50.0" visible="false" />
+      <Slider id="slider_Leftright" fx:id="slider_Leftright" layoutX="316.0" layoutY="50.0" onMouseReleased="#mouseDragReleased" orientation="VERTICAL" value="50.0" />
+      <CheckBox id="tickbox_Reverse" fx:id="tickbox_Reverse" layoutX="562.0" layoutY="22.0" mnemonicParsing="false" text="Smart Turning" visible="false" />
+      <Text layoutX="113.0" layoutY="117.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Left" textAlignment="CENTER" wrappingWidth="56.4453125" />
+      <Text layoutX="343.0" layoutY="126.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Both" />
+      <Text layoutX="524.0" layoutY="124.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="56.44530802965164" />
+      <Button fx:id="button_Connect" layoutX="363.0" layoutY="30.0" mnemonicParsing="false" onAction="#start_socket" text="Connect" />
+      <Text fx:id="text_Status" layoutX="233.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Status: Disconnected" />
+      <Button fx:id="button_Stop" layoutX="550.0" layoutY="30.0" mnemonicParsing="false" onAction="#stop_butto" text="Stop" />
+    </children>
+</AnchorPane>
