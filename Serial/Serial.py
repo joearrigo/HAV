@@ -11,7 +11,7 @@ def listen(ser, client):
         if line.decode() != "" and line.decode() != "\n":
             pline = line.decode().replace("\n", "")
             print(pline)
-            client.send(("HAV_pi"+pline).encode())
+            client.send(("<HAV_pi>"+pline).encode())
 
 def listen2(client, ser):
     while True:
@@ -26,12 +26,14 @@ def listen2(client, ser):
                 ser.write(command.encode())
 
 rbSer = None
+pwSer = None
 
-PORT = 4444;
+PORT = 4444
 client = 0
 address = 0
 
 connectd = False
+connectd2= False
 
 #COM PORT STUFF
 ports = list(serial.tools.list_ports.comports())
@@ -45,6 +47,12 @@ for p in ports:
         print(line.decode())
         connectd = True
         break
+    else:
+        if "<HAV_pw>" in line.decode():
+            print(line.decode())
+            connectd2 = True
+            break
+
 
 #SOCKET STUFF (SERVER)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,5 +78,8 @@ thread.start()
 thread2 = Thread(target=listen2, args=(client, rbSer))
 thread2.start()
 
-while connectd == True:
+thread3 = Thread(target=listen, args=(pwSer, client))
+thread3.start()
+
+while connectd == True or connectd2 == True:
     pass
