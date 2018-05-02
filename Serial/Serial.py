@@ -3,6 +3,7 @@ import serial.tools.list_ports
 from threading import Thread
 import socket
 import time
+import os
 
 def listen(ser, client):
     while True:
@@ -14,11 +15,15 @@ def listen(ser, client):
 
 def listen2(client, ser):
     while True:
-        command = client.recv(1024).decode()
+        command = client.recv(2048).decode()
         if "<HAV_ts>" in command:
+            command = command.replace("<HAV_ts>", "")
             print(command)
-            command.replace("<HAV_ts>", "")
-            rbSer.write(command.encode())
+            if "reboot" in command:
+                os.system('sudo shutdown -r now')
+            else:
+                print(command)
+                ser.write(command.encode())
 
 rbSer = None
 
@@ -45,7 +50,7 @@ for p in ports:
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #print(socket.gethostname())
 #IP = socket.gethostbyname("HAV_pi")
-server.bind(("10.0.0.12", PORT))
+server.bind(("192.168.50.104", PORT))
 server.listen(1)
 while client == 0:
     while client == 0:
