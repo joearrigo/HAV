@@ -50,7 +50,7 @@ public class FXMLDocumentController implements Initializable {
     Socket socket;
     PrintWriter out;
     BufferedReader in;
-    ScheduledExecutorService executor;
+    ScheduledExecutorService executor, executor2;
     
     @FXML
     void mouseDragReleased(){
@@ -73,11 +73,13 @@ public class FXMLDocumentController implements Initializable {
     
     public void start_socket(){
         try {
-            socket = new Socket("192.168.50.104", 4444);
+            socket = new Socket("192.168.50.56", 4444);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out.println("<HAV_ts>");
             text_Status.setText("Status: Connected");
+            
+            System.out.println("Good1");
             
             Runnable helloRunnable = new Runnable() {
                 public void run() {
@@ -94,6 +96,22 @@ public class FXMLDocumentController implements Initializable {
             };
             executor = Executors.newScheduledThreadPool(1);
             executor.scheduleAtFixedRate(helloRunnable, 0, 2000, TimeUnit.MILLISECONDS);
+            
+            System.out.println("Good2");
+            
+            Runnable helloRunnable2 = new Runnable() {
+                public void run() {
+                    try {
+                        System.out.println(in.readLine());
+                    } catch (IOException ex) {
+                        Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            };
+            executor2 = Executors.newScheduledThreadPool(1);
+            executor2.scheduleAtFixedRate(helloRunnable2, 0, 10, TimeUnit.MILLISECONDS);
+            
+            System.out.println("Good3");
             
         } catch (IOException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);

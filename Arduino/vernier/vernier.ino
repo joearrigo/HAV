@@ -3,9 +3,12 @@
 float rawCounts[4];
 float voltages[4];
 
+bool connectd = false;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  connect();
 }
 
 void loop() {
@@ -33,6 +36,14 @@ void loop() {
 }
 
 void connect(){
+  while(connectd == false){
+    String input = Serial.readStringUntil('\n');
+    if(input.startsWith("<HAV_pi>")){
+      Serial.println("<HAV_pw>");
+      connectd = true;
+      break;
+    }
+  }
 }
 /*
 float thermistor(int raw) {

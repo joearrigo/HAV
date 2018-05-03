@@ -46,19 +46,19 @@ for p in ports:
     if "<HAV_rb>" in line.decode():
         print(line.decode())
         connectd = True
-        break
     else:
         if "<HAV_pw>" in line.decode():
             print(line.decode())
             connectd2 = True
-            break
+    if connectd == True and connectd2 == True:
+        break
 
 
 #SOCKET STUFF (SERVER)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #print(socket.gethostname())
 #IP = socket.gethostbyname("HAV_pi")
-server.bind(("192.168.50.104", PORT))
+server.bind(("192.168.50.56", PORT))
 server.listen(1)
 while client == 0:
     while client == 0:

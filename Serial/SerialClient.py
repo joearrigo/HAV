@@ -7,16 +7,15 @@ IP = None
 
 while IP == None:
     #IP = socket.gethostbyname(socket.gethostname())
-    IP = socket.gethostbyname("HAV_pi")
+    IP = "192.168.50.56"
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((IP, PORT))
-    server.send("<HAV_ts>".encode())
     data = server.recv(1024).decode()
     if "<HAV_pi>" not in data:
         IP = None
     else:
-        print("<SELF> Connected!")
+        server.send("<HAV_ts>".encode())
     time.sleep(5)
 
 while True:
-    server.send(input().encode())
+    print(server.recv(2048).decode())
