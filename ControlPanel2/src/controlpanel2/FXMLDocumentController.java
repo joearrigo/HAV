@@ -92,6 +92,7 @@ public class FXMLDocumentController implements Initializable {
     public void connect(){
         try {
             socket = new Socket(IP, 4444);
+            socket.setTcpNoDelay(true);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out.println("<HAV_ts>");
