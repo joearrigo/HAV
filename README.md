@@ -1,2 +1,0 @@
-# HAV
-# For HAV Tech
