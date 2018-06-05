@@ -23,34 +23,28 @@ def listen2(client, ser):
                 os.system('sudo shutdown -r now')
             else:
                 print(command)
-                ser.write(command.encode())
+                ser.write((command).encode())
 
 rbSer = None
-pwSer = None
 
 PORT = 4444
 client = 0
 address = 0
 
 connectd = False
-connectd2= False
 
 #COM PORT STUFF
 ports = list(serial.tools.list_ports.comports())
 for p in ports:
     rbSer = serial.Serial(p[0], 9600, timeout=10)
     line = rbSer.readline()
-    print("rb"+line.decode())
+    print(line.decode())
     rbSer.write("<HAV_pi>\n".encode())
     line = rbSer.readline()
     if "<HAV_rb>" in line.decode():
         print(line.decode())
         connectd = True
-    else:
-        if "<HAV_pw>" in line.decode():
-            print(line.decode())
-            connectd2 = True
-    if connectd == True and connectd2 == True:
+    if connectd == True:
         break
 
 
@@ -58,7 +52,7 @@ for p in ports:
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #print(socket.gethostname())
 #IP = socket.gethostbyname("HAV_pi")
-server.bind(("192.168.50.56", PORT))
+server.bind(("192.168.50.104", PORT))
 server.listen(1)
 while client == 0:
     while client == 0:
@@ -78,8 +72,5 @@ thread.start()
 thread2 = Thread(target=listen2, args=(client, rbSer))
 thread2.start()
 
-thread3 = Thread(target=listen, args=(pwSer, client))
-thread3.start()
-
-while connectd == True or connectd2 == True:
+while connectd == True:
     pass

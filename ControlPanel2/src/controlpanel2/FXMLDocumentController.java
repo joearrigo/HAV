@@ -39,10 +39,10 @@ public class FXMLDocumentController implements Initializable {
     @FXML private WebView view_Camera;
     @FXML private MenuItem menu_Close, menu_Settings, menu_About;
     @FXML private Button button_Connect, button_FWD, button_BAK, button_LFT,
-            button_RGT, button_Controller;
+            button_RGT, button_Controller, button_ASC, button_DSC, button_DEC1,
+            button_DEC2, button_INC1, button_INC2;
     @FXML private Circle circle_Indicator, circle_Indicator2;
-    @FXML private Text text_A1, text_A2, text_A3, text_A4, text_Motor1,
-            text_Motor2;
+    @FXML private Text text_A1, text_A2, text_A3, text_A4;
     
     Socket socket;
     String IP = "";
@@ -52,6 +52,13 @@ public class FXMLDocumentController implements Initializable {
     
     boolean gamepadOn;
     Controller gamepad;
+    
+    int servo1 = 90;
+    int servo2 = 90;
+    
+    float motorL = 0;
+    float motorR = 0;
+    float motorV = 0;
     
     Properties properties;
     FileInputStream input;
@@ -98,41 +105,74 @@ public class FXMLDocumentController implements Initializable {
             out.println("<HAV_ts>");
             circle_Indicator.setFill(Color.LIME); 
             
-            Runnable thrusterOutput = new Runnable() {
+            Runnable helloRunnable = new Runnable() {
                 public void run() {
-                    float motor1 = 0, motor2 = 0;
-                    
-                    boolean fwd = button_FWD.isPressed();
-                    boolean bak = button_BAK.isPressed();
-                    boolean lft = button_LFT.isPressed();
-                    boolean rgt = button_RGT.isPressed();
-                    
-                    if(fwd){
-                        motor1 = 0.6f;
-                        motor2 = 0.6f;
-                    }else if(bak){
-                        motor1= -0.6f;
-                        motor2 = -0.6f;
-                    }else if(lft){
-                        motor1 = 0.6f;
-                        motor2 = -0.6f;
-                    }else if(rgt){
-                        motor1 = -0.6f;
-                        motor2 = 0.6f;
+                    float val = 0.6f;
+                    if(button_FWD.isPressed()){
+                        motorL = val;
+                        motorR = val;
+                        motorV = 0;
+                    }else if(button_LFT.isPressed()){
+                        motorL = -val;
+                        motorR = val;
+                        motorV = 0;
+                    }else if(button_RGT.isPressed()){
+                        motorL = val;
+                        motorR = -val;
+                        motorV = 0;
+                    }else if(button_BAK.isPressed()){
+                        motorL = -val;
+                        motorR = -val;
+                        motorV = 0;
+                    }else if(button_ASC.isPressed()){
+                        motorL = 0;
+                        motorR = 0;
+                        motorV = val;
+                    }else if(button_DSC.isPressed()){
+                        motorL = 0;
+                        motorR = 0;
+                        motorV = -val;
                     }else{
-                        motor1 = 0.0f;
-                        motor2 = 0.0f;
+                        motorL = 0;
+                        motorR = 0;
+                        motorV = 0;
                     }
                     
-                    if(gamepadOn){
+                    if(button_DEC1.isPressed()){
+                        servo1-= 20;
+                    }else if(button_INC1.isPressed()){
+                        servo1+= 20;
+                    }
+                    
+                    if(button_DEC2.isPressed()){
+                        servo2-= 20;
+                    }else if(button_INC2.isPressed()){
+                        servo2+= 20;
+                    }
+                    
+                    //GAMEPAD CODE
+                    
+                    if(gamepadOn) {
                         gamepad.poll();
                         Component yC = gamepad.getComponent(Component.Identifier.Axis.Y);
                         Component ryC = gamepad.getComponent(Component.Identifier.Axis.RY);
                         Component zC = gamepad.getComponent(Component.Identifier.Axis.Z);
                         
-                        float y = yC.getPollData();
-                        float ry = ryC.getPollData();
-                        float z = zC.getPollData();
+                        Component bL = gamepad.getComponent(Component.Identifier.Button._4);
+                        Component bR = gamepad.getComponent(Component.Identifier.Button._5);
+                        Component start = gamepad.getComponent(Component.Identifier.Button._7);
+                        
+                        float y2 = yC.getPollData();
+                        float ry2 = ryC.getPollData();
+                        float z2 = zC.getPollData();
+                        
+                        float y1 = Math.round(y2*100);
+                        float ry1 = Math.round(ry2*100);
+                        float z1 = Math.round(z2*100);
+                        
+                        float y = -y1/100;
+                        float ry = -ry1/100;
+                        float z = -z1/100;
                         
                         if(y < .1 && y > -.1){
                             y = 0.0f;
@@ -150,54 +190,61 @@ public class FXMLDocumentController implements Initializable {
                             z = 1f;
                         }
                         
-                        motor1=y;
-                        motor2=ry;
+                        motorL=y;
+                        motorR=ry;
+                        motorV=z;
+                        
+                        boolean flipped = (start.getPollData() == 1.0f);
+                        
+                        if(bL.getPollData() == 1.0f){
+                            if(!flipped){
+                                servo1 -= 10;
+                            }else {
+                                servo2 -= 10;
+                            }
+                        }else if(bR.getPollData() == 1.0f){
+                            if(!flipped){
+                                servo1 += 10;
+                            }else {
+                                servo2 += 10;
+                            }
+                        }
                     }
                     
-                    text_Motor1.setText(""+motor1);
-                    text_Motor2.setText(""+motor2);
-                    out.println("<HAV_ts> " + motor1 + "," + motor2 +"\n");
+                    if(servo1 > 180){
+                        servo1 = 180;
+                    }else if(servo1 < 0){
+                        servo1 = 0;
+                    }
+                    
+                    if(servo2 > 180){
+                        servo2 = 180;
+                    }else if(servo2 < 0){
+                        servo2 = 0;
+                    }
+                    
+                    send("<HAV_ts>th " + motorL + "," + motorR +"\n");
+                    send("<HAV_ts>tv " + motorV + "\n");
+                    send("<HAV_ts>s1 " + servo1);
+                    send("<HAV_ts>s2 " + servo2);
                 }
             };
             executor = Executors.newScheduledThreadPool(1);
-            executor.scheduleAtFixedRate(thrusterOutput, 0, 2000, TimeUnit.MILLISECONDS);
+            executor.scheduleAtFixedRate(helloRunnable, 0, 2000, TimeUnit.MILLISECONDS);
             
-            Runnable probewareInput = new Runnable() {
+            System.out.println("Good2");
+            
+            Runnable helloRunnable2 = new Runnable() {
                 public void run() {
                     try {
-                        String strIn = in.readLine();
-                        strIn = strIn.replace("<HAV_pi>", "");
-                        
-                        if(strIn.startsWith("<HAV_pw>")){
-                            strIn = strIn.replace("<HAV_pw>", "") + ",";
-                            String[] strValues = new String[4];
-                            int it = 0;
-                            for(char a : strIn.toCharArray()){
-                                if(a == ','){
-                                    it++;
-                                }else{
-                                    strValues[it] = strValues[it] + a;
-                                }
-                            }
-                            float[] values = new float[4];
-                            for(int i = 0; i < strValues.length; i++){
-                                values[i] = Float.parseFloat(strValues[i]);
-                            }
-                            
-                            text_A1.setText(""+values[1]);
-                            text_A2.setText(""+values[2]);
-                            text_A3.setText(""+values[3]);
-                            text_A4.setText(""+values[4]);
-                        }
-                        
+                        System.out.println(in.readLine());
                     } catch (IOException ex) {
                         Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             };
             executor2 = Executors.newScheduledThreadPool(1);
-            executor2.scheduleAtFixedRate(probewareInput, 0, 10, TimeUnit.MILLISECONDS);
-            
+            executor2.scheduleAtFixedRate(helloRunnable2, 0, 10, TimeUnit.MILLISECONDS);
         } catch (IOException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
             circle_Indicator.setFill(Color.YELLOW);
@@ -218,6 +265,7 @@ public class FXMLDocumentController implements Initializable {
         
         if(gamepad != null){
             circle_Indicator2.setFill(Color.LIME);
+            gamepadOn = true;
         }else{
             
         }
@@ -246,5 +294,26 @@ public class FXMLDocumentController implements Initializable {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }    
+    
+    @FXML
+    public void stop_butto(){
+        try{
+            executor.shutdown(); 
+        }catch(Exception ex){}
+        try{
+            out.println("<HAV_ts>reboot\n");
+        }catch(Exception ex){}
+        try{
+            socket.close();
+        }catch(Exception ex){}
+        circle_Indicator.setFill(Color.RED);
+        circle_Indicator2.setFill(Color.RED);
+        System.exit(0);
+       
+    }
+    
+    public void send(String message){
+        out.println("<"+message+">");
+    }
     
 }
