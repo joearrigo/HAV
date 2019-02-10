@@ -52,7 +52,7 @@ for p in ports:
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #print(socket.gethostname())
 #IP = socket.gethostbyname("HAV_pi")
-server.bind(("192.168.50.104", PORT))
+server.bind(("192.168.50.101", PORT))
 server.listen(1)
 while client == 0:
     while client == 0:
